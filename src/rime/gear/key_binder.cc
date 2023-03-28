@@ -16,6 +16,7 @@
 #include <rime/switcher.h>
 #include <rime/switches.h>
 #include <rime/gear/key_binder.h>
+#include <rime/gear/ascii_composer.h>
 
 using namespace std::placeholders;
 
@@ -168,6 +169,26 @@ static void select_schema(Engine* engine, const string& schema) {
   }
 }
 
+static void toggle_ascii_mode(Engine* engine, const AsciiModeSwitchStyle& style) {
+  Context* ctx = engine->context();
+  bool ascii_mode = !ctx->get_option("ascii_mode");
+  DLOG(INFO) << "ascii mode: " << ascii_mode << ", switch style: " << style;
+  if (ctx->IsComposing()) {
+    if (style == kAsciiModeSwitchCommitText) {
+      ctx->ConfirmCurrentSelection();
+    }
+    else if (style == kAsciiModeSwitchCommitCode) {
+      ctx->ClearNonConfirmedComposition();
+      ctx->Commit();
+    }
+    else if (style == kAsciiModeSwitchClear) {
+      ctx->Clear();
+    }
+  }
+  // refresh non-confirmed composition with new mode
+  ctx->set_option("ascii_mode", ascii_mode);
+}
+
 void KeyBindings::LoadBindings(const an<ConfigList>& bindings) {
   if (!bindings)
     return;
@@ -217,6 +238,20 @@ void KeyBindings::LoadBindings(const an<ConfigList>& bindings) {
     }
     else if (auto schema = map->GetValue("select")) {
       binding.action = std::bind(&select_schema, _1, schema->str());
+    }
+    else if (auto style = map->GetValue("switch")) {
+      auto* p = ascii_mode_switch_styles;
+      while (p->repr && p->repr != style->str())
+        ++p;
+      if (p->style == kAsciiModeSwitchNoop) {
+        LOG(ERROR) << "invalid switch option";
+        continue;
+      }
+      else if (p->style == kAsciiModeSwitchInline) {
+        LOG(ERROR) << "not implement";
+        continue;
+      }
+      binding.action = std::bind(&toggle_ascii_mode, _1, p->style);
     }
     else {
       LOG(WARNING) << "invalid key binding #" << i << ".";

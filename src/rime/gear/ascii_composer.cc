@@ -15,17 +15,6 @@
 
 namespace rime {
 
-static struct AsciiModeSwitchStyleDefinition {
-  const char* repr;
-  AsciiModeSwitchStyle style;
-} ascii_mode_switch_styles[] = {
-  { "inline_ascii", kAsciiModeSwitchInline },
-  { "commit_text", kAsciiModeSwitchCommitText },
-  { "commit_code", kAsciiModeSwitchCommitCode },
-  { "clear", kAsciiModeSwitchClear },
-  { NULL, kAsciiModeSwitchNoop }
-};
-
 static void load_bindings(const an<ConfigMap>& src,
                           AsciiModeSwitchKeyBindings* dest) {
   if (!src)
