@@ -213,6 +213,16 @@ RIME_API void RimeClearComposition(RimeSessionId session_id) {
   session->ClearComposition();
 }
 
+RIME_API void RimeCommitCode(RimeSessionId session_id, bool ascii_mode) {
+  an<Session> session(Service::instance().GetSession(session_id));
+  if (!session)
+    return;
+  Context *ctx = session->context();
+  ctx->ClearNonConfirmedComposition();
+  ctx->Commit();
+  ctx->set_option("ascii_mode", ascii_mode);
+}
+
 // output
 
 static void rime_candidate_copy(RimeCandidate* dest, const an<Candidate>& src) {

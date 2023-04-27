@@ -270,6 +270,7 @@ RIME_API Bool RimeProcessKey(RimeSessionId session_id, int keycode, int mask);
  */
 RIME_API Bool RimeCommitComposition(RimeSessionId session_id);
 RIME_API void RimeClearComposition(RimeSessionId session_id);
+RIME_API void RimeCommitCode(RimeSessionId session_id, bool ascii_mode);
 
 // Output
 
